@@ -1,4 +1,4 @@
-./.env
-./database.db
-./venv
-./__pycache__
+.env
+database.db
+venv/
+__pycache__/

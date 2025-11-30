@@ -124,27 +124,7 @@ app = Flask(__name__)
 
 # Users
 @app.route('/users', methods=['GET'])
-def get_usuarios():
-    """
-    Obtiene todos los usuarios registrados.
-    ---
-    tags:
-      - Users
-    responses:
-      200:
-        description: Lista de usuarios
-        examples:
-          application/json:
-            usuarios: [
-              {
-                "id": 1,
-                "name": "Gonzalo",
-                "artists": ["Skillet"],
-                "songs": ["Zeus"]
-              }
-            ]
-    """
-    
+def get_usuarios():  
     conn = get_db()
     rows = conn.execute('SELECT * FROM users').fetchall()
     conn.close()

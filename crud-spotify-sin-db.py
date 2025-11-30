@@ -4,7 +4,7 @@ from flask import Flask, request
 from pydantic import BaseModel, ValidationError
 # pip install Flask, requests, python-dotenv, pydantic
 
-spotify_token = 'Bearer BQBF6AKMN9XgDsp6SRcjTqNpWY3TpReP1v5_q_ws6MWedXKzfksz_xc8yj_YS6w7bs4WLYZFdOXhCbB57O9z5Ipk8VCSmMR4NTPTDAEVHZYIA5XZXAR70W39X9Dy9Lg-HF5onhxkKk4'
+spotify_token = ''
 
 def load_spotify_api():
     load_dotenv()

@@ -1,7 +1,8 @@
 import os, requests, json, sqlite3
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from pydantic import BaseModel, ValidationError
+# pip install Flask, requests, python-dotenv, pydantic
 
 spotify_token = ''
 
@@ -124,11 +125,31 @@ app = Flask(__name__)
 # Users
 @app.route('/users', methods=['GET'])
 def get_usuarios():
+    """
+    Obtiene todos los usuarios registrados.
+    ---
+    tags:
+      - Users
+    responses:
+      200:
+        description: Lista de usuarios
+        examples:
+          application/json:
+            usuarios: [
+              {
+                "id": 1,
+                "name": "Gonzalo",
+                "artists": ["Skillet"],
+                "songs": ["Zeus"]
+              }
+            ]
+    """
+    
     conn = get_db()
     rows = conn.execute('SELECT * FROM users').fetchall()
     conn.close()
 
-    return jsonify( {'usuarios': [row_to_user(r) for r in rows]} ), 200
+    return jsonify({'usuarios': [row_to_user(r) for r in rows]}), 200
 
 @app.route('/users/<username>', methods=['GET'])
 def get_user(username):
@@ -137,15 +158,15 @@ def get_user(username):
     conn.close()
 
     if row:
-        return jsonify( {'usuario': row_to_user(row)} ), 200
+        return jsonify({'usuario': row_to_user(row)}), 200
     
-    return jsonify( {'error': 'El usuario no está registrado.'} ), 404
+    abort(404)
 
 @app.route('/users', methods=['POST'])
 def post_usuarios():
     new_users = request.get_json()
     if 'users' not in new_users:
-        return jsonify( {'error': 'Debes mandar una lista de usuarios.'} ), 400
+        abort(400)
 
     conn = get_db()
     for user in new_users['users']:
@@ -155,11 +176,11 @@ def post_usuarios():
                 (new_user.name, json.dumps(new_user.artists), json.dumps(new_user.songs))
             )
         except ValidationError as e:
-            return jsonify( {'error': e.errors()} ), 404
+            abort(404)
     conn.commit()
     conn.close()
 
-    return jsonify( {'message': 'Usuarios insertados correctamente.'} ), 201
+    return jsonify({'message': 'Usuarios insertados correctamente.'}), 201
 
 @app.route('/users/<username>', methods=['PUT'])
 def update_user(username):
@@ -167,7 +188,7 @@ def update_user(username):
     try:
         user = User(**new_user)
     except ValidationError as e:
-        return jsonify( {'error': e.errors()} ), 400
+        abort(400)
 
     conn = get_db()
     result = conn.execute('UPDATE users SET name=?, artists=?, songs=? WHERE name=?',
@@ -178,9 +199,9 @@ def update_user(username):
     conn.close()
 
     if result.rowcount:
-        return jsonify( {'message': 'El usuario se ha modificado correctamente.'} ), 200
+        return jsonify({'message': 'El usuario se ha modificado correctamente.'}), 200
     
-    return jsonify( {'error': 'No se ha encontrado ningún usuario con el nombre de usuario proporcionado.'} ), 404
+    abort(404)
 
 @app.route('/users/<username>', methods=['DELETE'])
 def delete_user(username):
@@ -190,18 +211,19 @@ def delete_user(username):
     conn.close()
 
     if result.rowcount:
-        return jsonify( {'message': 'El usuario se ha eliminado correctamente.'} ), 200
+        return jsonify({'message': 'El usuario se ha eliminado correctamente.'}), 200
     
-    return jsonify( {'message': 'No se ha encontrado ningún usuario con el nombre de usuario proporcionado.'} ), 404
+    abort(404)
 
 # Artists
 @app.route('/artists/<username>', methods=['GET'])
 def get_artists(username):
     conn = get_db()
     row = conn.execute('SELECT artists FROM users WHERE name=?', (username,)).fetchone()
+    conn.close()
 
     if not row:
-        return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+        abort(404)
     
     artists_id = []
     for artist in json.loads(row['artists']):
@@ -219,12 +241,13 @@ def get_artists(username):
 def post_artists(username):
     new_artists = request.get_json()
     if 'artists' not in new_artists:
-        return jsonify( {'error': 'Debes mandar los nuevos artistas del usuario'} ), 400
+        abort(400)
 
     conn = get_db()
     row = conn.execute('SELECT * FROM users WHERE name=?', (username,)).fetchone()
     if not row:
-        return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+        conn.close()
+        abort(404)
 
     artists = json.loads(row['artists'])
     for artist in new_artists['artists']:
@@ -234,13 +257,13 @@ def post_artists(username):
     conn.commit()
     conn.close()
 
-    return jsonify ( {'message': 'Artistas insertados correctamente.'} ), 201
+    return jsonify({'message': 'Artistas insertados correctamente.'}), 201
 
 @app.route('/artists/<username>', methods=['PUT'])
 def update_artists(username):
     artists = request.get_json()
     if 'artists' not in artists:
-        return jsonify( {'error': 'Debes mandar los nuevos artistas del usuario'} ), 400
+        abort(400)
 
     new_artists = artists['artists']
 
@@ -252,15 +275,15 @@ def update_artists(username):
     conn.close()
 
     if result.rowcount:
-        return jsonify( {'message': 'Artistas actualizados correctamente.'} ), 200
+        return jsonify({'message': 'Artistas actualizados correctamente.'}), 200
     
-    return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+    abort(404)
 
 @app.route('/artists/<username>', methods=['DELETE'])
 def delete_artists(username):
     artists_data = request.get_json()
     if 'artists' not in artists_data:
-        return jsonify( {'error': 'Debes mandar los artistas que quieres borrar del usuario'} ), 400
+        abort(400)
 
     artists_to_delete = artists_data['artists']
 
@@ -269,7 +292,7 @@ def delete_artists(username):
 
     if not row:
         conn.close()
-        return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+        abort(404)
 
     artists = json.loads(row['artists'])
 
@@ -281,7 +304,7 @@ def delete_artists(username):
     conn.commit()
     conn.close()
 
-    return jsonify( {'message': 'Artistas eliminados correctamente.'} ), 200
+    return jsonify({'message': 'Artistas eliminados correctamente.'}), 200
 
 # Songs
 @app.route('/songs/<username>', methods=['GET'])
@@ -290,7 +313,8 @@ def get_songs(username):
     row = conn.execute('SELECT songs FROM users WHERE name=?', (username,)).fetchone()
 
     if not row:
-        return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+        conn.close()
+        abort(404)
     
     songs_id = []
     for song in json.loads(row['songs']):
@@ -302,18 +326,21 @@ def get_songs(username):
         song_data = get_song(id)
         songs_info.append(song_data)
     
-    return jsonify({'artists_info': songs_info}), 200
+    conn.close()
+
+    return jsonify({'songs_info': songs_info}), 200
 
 @app.route('/songs/<username>', methods=['POST'])
 def post_songs(username):
     new_songs = request.get_json()
     if 'songs' not in new_songs:
-        return jsonify( {'error': 'Debes mandar las nuevas canciones del usuario'} ), 400
+        abort(400)
 
     conn = get_db()
     row = conn.execute('SELECT * FROM users WHERE name=?', (username,)).fetchone()
     if not row:
-        return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+        conn.close()
+        abort(404)
 
     songs = json.loads(row['songs'])
     for artist in new_songs['songs']:
@@ -323,13 +350,13 @@ def post_songs(username):
     conn.commit()
     conn.close()
 
-    return jsonify ( {'message': 'Canciones insertados correctamente.'} ), 201
+    return jsonify({'message': 'Canciones insertados correctamente.'}), 201
 
 @app.route('/songs/<username>', methods=['PUT'])
 def update_songs(username):
     songs = request.get_json()
     if 'songs' not in songs:
-        return jsonify( {'error': 'Debes mandar las nuevas canciones del usuario'} ), 400
+        abort(400)
 
     new_songs = songs['songs']
 
@@ -341,15 +368,15 @@ def update_songs(username):
     conn.close()
 
     if result.rowcount:
-        return jsonify( {'message': 'Canciones actualizadas correctamente.'} ), 200
+        return jsonify({'message': 'Canciones actualizadas correctamente.'}), 200
     
-    return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+    abort(404)
 
 @app.route('/songs/<username>', methods=['DELETE'])
 def delete_songs(username):
     songs_data = request.get_json()
     if 'songs' not in songs_data:
-        return jsonify( {'error': 'Debes mandar las canciones que quieres borrar del usuario'} ), 400
+        abort(400)
 
     songs_to_delete = songs_data['songs']
 
@@ -358,7 +385,7 @@ def delete_songs(username):
 
     if not row:
         conn.close()
-        return jsonify( {'error': 'El usuario no está registrado en el sistema.'} ), 404
+        abort(404)
 
     songs = json.loads(row['songs'])
 
@@ -370,7 +397,28 @@ def delete_songs(username):
     conn.commit()
     conn.close()
 
-    return jsonify( {'message': 'Canciones eliminadas correctamente.'} ), 200
+    return jsonify({'message': 'Canciones eliminadas correctamente.'}), 200
+
+@app.route('/docs', methods=['GET'])
+def get_docs():
+    return jsonify({'message': 'Para ver la documentación completa: https://github.com/GonzaloMartinezIanez/unidad2-crud-spotify.git'}), 200
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return abort(400)
+
+@app.errorhandler(400)
+def resource_not_found(e):
+    return jsonify({'error': 'Bad requests. Para ver la documentación completa: https://github.com/GonzaloMartinezIanez/unidad2-crud-spotify.git'}), 400
+
+@app.errorhandler(404)
+def resource_not_found(e):
+    return jsonify({'error': 'Not found. El usuario no está registrado en el sistema.'}), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({'error': 'Internal server error. El servidor ha encontrado una situación que no sabe cómo manejarla.'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

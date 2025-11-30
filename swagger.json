@@ -1,0 +1,250 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Spotify CRUD API",
+    "description": "Fundamentos de backend con python. Entrega Unidad 2: API para gestionar los gustos musicales de los usuarios y obtener información de estos usando la API de spotify.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Gonzalo Martínez Iáñez"    
+    }
+  },
+  "host": "localhost:5000",
+  "basePath": "/users",
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Obtiene todos los usuarios",
+        "responses": {
+          "200": { "description": "Lista de usuarios" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Inserta uno o varios usuarios, el nombre de cada usuario debe ser único",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/User"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Usuarios insertados correctamente" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      }
+    },
+
+    "/users/{username}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Obtiene la información de un usuario mediante su nombre",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Usuario encontrado" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Actualiza los datos de un usuario, si se cambia el nombre no puede ser a uno que ya existe",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Usuario actualizado" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Elimina un usuario mediante su nombre",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Usuario eliminado" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      }
+    },
+
+    "/artists/{username}": {
+      "get": {
+        "tags": ["Artists"],
+        "summary": "Obtiene información de los artistas del usuario haciendo uso de la api de spotify",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Artistas obtenidos" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "post": {
+        "tags": ["Artists"],
+        "summary": "Añade nuevos artistas al usuario seleccionado",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "artists": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Artistas añadidos" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Artists"],
+        "summary": "Sustituye la lista de los artistas del usuario por una nueva proporcionada",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "artists": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Artistas actualizados" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "delete": {
+        "tags": ["Artists"],
+        "summary": "Elimina uno o una lista de los artistas de un usuario (el usuario debe tener dichos artistas)",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "artists": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Artistas eliminados" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      }
+    },
+
+    "/songs/{username}": {
+      "get": {
+        "tags": ["Songs"],
+        "summary": "Obtiene información de las canciones del usuario haciendo uso de la api de spotify",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Canciones obtenidas" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "post": {
+        "tags": ["Songs"],
+        "summary": "Añade nuevas canciones al usuario seleccionado",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "songs": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Canciones añadidas" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "put": {
+        "tags": ["Songs"],
+        "summary": "Sustituye la lista de las canciones del usuario por una nueva proporcionada",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "songs": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Canciones actualizadas" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "delete": {
+        "tags": ["Songs"],
+        "summary": "Elimina una o una lista de las canciones de un usuario (el usuario debe tener dichas canciones)",
+        "parameters": [
+          { "name": "username", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "songs": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Canciones eliminadas" },
+          "400": { "description": "Error en la estructura de la petición" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "artists": { "type": "array", "items": { "type": "string" } },
+        "songs": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

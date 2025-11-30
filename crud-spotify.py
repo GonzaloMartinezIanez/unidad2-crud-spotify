@@ -2,7 +2,8 @@ import os, requests, json, sqlite3
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, abort
 from pydantic import BaseModel, ValidationError
-# pip install Flask, requests, python-dotenv, pydantic
+from flasgger import Swagger
+# pip install Flask requests python-dotenv pydantic flasgger
 
 spotify_token = ''
 
@@ -22,7 +23,6 @@ def load_spotify_api():
     global spotify_token
     spotify_token = 'Bearer ' + get_token.json()['access_token']
 
-
 def get_artist_or_song_id(name: str, isArtist: bool):
     formated_name = name.replace(' ', '+')
     type = 'artist' if isArtist else 'track'
@@ -36,7 +36,6 @@ def get_artist_or_song_id(name: str, isArtist: bool):
     type = type + 's' # El atributo esta en plural
     id = response.json()[type]['items'][0]['id']
     return id
-
 
 def get_artist(id: str):
     endpoint = 'https://api.spotify.com/v1/artists/' + id
@@ -121,6 +120,7 @@ def row_to_user(row):
     }
 
 app = Flask(__name__)
+swagger = Swagger(app, template=json.load(open("swagger.json")))
 
 # Users
 @app.route('/users', methods=['GET'])
@@ -379,10 +379,6 @@ def delete_songs(username):
 
     return jsonify({'message': 'Canciones eliminadas correctamente.'}), 200
 
-@app.route('/docs', methods=['GET'])
-def get_docs():
-    return jsonify({'message': 'Para ver la documentación completa: https://github.com/GonzaloMartinezIanez/unidad2-crud-spotify.git'}), 200
-
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
@@ -390,7 +386,7 @@ def catch_all(path):
 
 @app.errorhandler(400)
 def resource_not_found(e):
-    return jsonify({'error': 'Bad requests. Para ver la documentación completa: https://github.com/GonzaloMartinezIanez/unidad2-crud-spotify.git'}), 400
+    return jsonify({'error': 'Bad requests. Para ver la documentación completa: http://127.0.0.1:5000/apidocs/'}), 400
 
 @app.errorhandler(404)
 def resource_not_found(e):

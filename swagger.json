@@ -9,7 +9,7 @@
     }
   },
   "host": "localhost:5000",
-  "basePath": "/users",
+  "basePath": "/",
   "paths": {
     "/users": {
       "get": {

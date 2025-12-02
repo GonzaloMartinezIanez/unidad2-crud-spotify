@@ -2,10 +2,10 @@
   "swagger": "2.0",
   "info": {
     "title": "Spotify CRUD API",
-    "description": "Fundamentos de backend con python. Entrega Unidad 2: API para gestionar los gustos musicales de los usuarios y obtener información de estos usando la API de spotify.",
+    "description": "Fundamentos de backend con python. Entrega Unidad 2: API para gestionar los gustos musicales de los usuarios y obtener informacion de estos usando la API de spotify.",
     "version": "1.0.0",
     "contact": {
-      "name": "Gonzalo Martínez Iáñez"    
+      "name": "Gonzalo Martinez Iañez"    
     }
   },
   "host": "localhost:5000",
@@ -21,7 +21,7 @@
       },
       "post": {
         "tags": ["Users"],
-        "summary": "Inserta uno o varios usuarios, el nombre de cada usuario debe ser único",
+        "summary": "Inserta uno o varios usuarios, el nombre de cada usuario debe ser unico",
         "parameters": [
           {
             "in": "body",
@@ -37,12 +37,29 @@
                   }
                 }
               }
+            }, 
+            "example": {
+              "application/json": {
+                "users": [
+                  {
+                    "name": "Gonzalo",
+                    "artists": ["Destripando la historia", "Imagine Dragons"],
+                    "songs": ["Zeus de destripando la historia", "Believer de Imagine Dragons", "Natural de Imagine Dragons"]
+                  },
+                  {
+                    "name": "Maria",
+                    "artists": ["Skillet", "The Score"],
+                    "songs": ["Monster de Skillet", "Hero de Skillet", "Born for this de The Score"]
+                  }
+                ]
+              }
             }
           }
         ],
+        
         "responses": {
           "201": { "description": "Usuarios insertados correctamente" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       }
@@ -51,7 +68,7 @@
     "/users/{username}": {
       "get": {
         "tags": ["Users"],
-        "summary": "Obtiene la información de un usuario mediante su nombre",
+        "summary": "Obtiene la informacion de un usuario mediante su nombre",
         "parameters": [
           { "name": "username", "in": "path", "required": true, "type": "string" }
         ],
@@ -66,12 +83,25 @@
         "parameters": [
           { "name": "username", "in": "path", "required": true, "type": "string" },
           { "name": "body", "in": "body", "required": true,
-            "schema": { "$ref": "#/definitions/User" }
+            "schema": { 
+              "$ref": "#/definitions/User" 
+            },
+            "example": {
+              "application/json": {
+                "users": [
+                  {
+                    "name": "Julia",
+                    "artists": ["Green day"],
+                    "songs": ["The nights de Avicci"]
+                  }
+                ]
+              }
+            }
           }
         ],
         "responses": {
           "200": { "description": "Usuario actualizado" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       },
@@ -91,7 +121,7 @@
     "/artists/{username}": {
       "get": {
         "tags": ["Artists"],
-        "summary": "Obtiene información de los artistas del usuario haciendo uso de la api de spotify",
+        "summary": "Obtiene informacion de los artistas del usuario haciendo uso de la api de spotify",
         "parameters": [
           { "name": "username", "in": "path", "required": true, "type": "string" }
         ],
@@ -111,12 +141,17 @@
               "properties": {
                 "artists": { "type": "array", "items": { "type": "string" } }
               }
+            },
+            "example": {
+              "application/json": {
+                "artists": ["Fall out boy", "Linkin Park"]
+              }
             }
           }
         ],
         "responses": {
           "201": { "description": "Artistas añadidos" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       },
@@ -131,12 +166,17 @@
               "properties": {
                 "artists": { "type": "array", "items": { "type": "string" } }
               }
+            },
+            "example": {
+              "application/json": {
+                "artists": ["Green day"]
+              }
             }
           }
         ],
         "responses": {
           "200": { "description": "Artistas actualizados" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       },
@@ -156,7 +196,7 @@
         ],
         "responses": {
           "200": { "description": "Artistas eliminados" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       }
@@ -165,7 +205,7 @@
     "/songs/{username}": {
       "get": {
         "tags": ["Songs"],
-        "summary": "Obtiene información de las canciones del usuario haciendo uso de la api de spotify",
+        "summary": "Obtiene informacion de las canciones del usuario haciendo uso de la api de spotify",
         "parameters": [
           { "name": "username", "in": "path", "required": true, "type": "string" }
         ],
@@ -185,12 +225,17 @@
               "properties": {
                 "songs": { "type": "array", "items": { "type": "string" } }
               }
+            },
+            "example": {
+              "application/json": {
+                "songs": ["Baldur de destripando la historia", "Hermes de destripando la historia"]
+              }
             }
           }
         ],
         "responses": {
           "201": { "description": "Canciones añadidas" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       },
@@ -205,12 +250,17 @@
               "properties": {
                 "songs": { "type": "array", "items": { "type": "string" } }
               }
+            },
+            "example": {
+              "application/json": {
+                "songs": ["Ares de destripando la historia", "Gilgamesh de destripando la historia"]
+              }
             }
           }
         ],
         "responses": {
           "200": { "description": "Canciones actualizadas" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       },
@@ -230,7 +280,7 @@
         ],
         "responses": {
           "200": { "description": "Canciones eliminadas" },
-          "400": { "description": "Error en la estructura de la petición" },
+          "400": { "description": "Error en la estructura de la peticion" },
           "404": { "description": "Usuario no encontrado" }
         }
       }
